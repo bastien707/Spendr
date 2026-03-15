@@ -20,13 +20,13 @@ struct TransactionsView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 filterPicker
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
+                    .padding(.horizontal, DS.Spacing.md)
+                    .padding(.bottom, DS.Spacing.sm)
 
                 if filtered.isEmpty {
                     ContentUnavailableView(
                         "No Transactions",
-                        systemImage: "tray",
+                        systemImage: SFSymbol.empty,
                         description: Text("Add your first transaction with the + button.")
                     )
                 } else {
@@ -53,7 +53,7 @@ struct TransactionsView: View {
                     Button {
                         showingAddTransaction = true
                     } label: {
-                        Image(systemName: "plus.circle.fill")
+                        Image(systemName: SFSymbol.add)
                             .font(.title2)
                     }
                 }

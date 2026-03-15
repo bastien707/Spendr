@@ -5,17 +5,17 @@ struct ContentView: View {
         TabView {
             DashboardView()
                 .tabItem {
-                    Label("Dashboard", systemImage: "chart.pie.fill")
+                    Label("Dashboard", systemImage: SFSymbol.dashboard)
                 }
 
             TransactionsView()
                 .tabItem {
-                    Label("Transactions", systemImage: "list.bullet.rectangle.fill")
+                    Label("Transactions", systemImage: SFSymbol.transactions)
                 }
 
             BudgetView()
                 .tabItem {
-                    Label("Budget", systemImage: "target")
+                    Label("Budget", systemImage: SFSymbol.budget)
                 }
         }
     }

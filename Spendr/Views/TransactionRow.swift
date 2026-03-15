@@ -4,17 +4,14 @@ struct TransactionRow: View {
     let transaction: Transaction
 
     var body: some View {
-        HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(transaction.type == .income ? Color.green.opacity(0.15) : Color.red.opacity(0.15))
-                    .frame(width: 44, height: 44)
-                Image(systemName: transaction.category.icon)
-                    .font(.system(size: 18))
-                    .foregroundStyle(transaction.type == .income ? .green : .red)
-            }
+        HStack(spacing: DS.Spacing.md) {
+            CategoryIcon(
+                systemName: transaction.category.icon,
+                color: transaction.category.color,
+                size: DS.IconSize.md
+            )
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: DS.Spacing.xs) {
                 Text(transaction.title)
                     .font(.subheadline)
                     .fontWeight(.medium)
@@ -25,11 +22,8 @@ struct TransactionRow: View {
 
             Spacer()
 
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("\(transaction.type == .income ? "+" : "-")\(transaction.amount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(transaction.type == .income ? .green : .primary)
+            VStack(alignment: .trailing, spacing: DS.Spacing.xs) {
+                AmountLabel(amount: transaction.amount, type: transaction.type)
                 Text(transaction.date, style: .time)
                     .font(.caption)
                     .foregroundStyle(.tertiary)
