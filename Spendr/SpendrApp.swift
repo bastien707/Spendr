@@ -7,7 +7,12 @@ struct SpendrApp: App {
 
     init() {
         let schema = Schema([Transaction.self, CategoryBudget.self, UserCategory.self])
-        let config = ModelConfiguration(isStoredInMemoryOnly: false)
+        let config = ModelConfiguration(
+            "Spendr",
+            schema: schema,
+            isStoredInMemoryOnly: false,
+            cloudKitDatabase: .automatic
+        )
         container = try! ModelContainer(for: schema, configurations: [config])
 
         let context = ModelContext(container)
