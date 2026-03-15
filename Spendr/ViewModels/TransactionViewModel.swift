@@ -17,11 +17,14 @@ class TransactionViewModel {
         totalIncome - totalExpenses
     }
 
-    var expensesByCategory: [(category: Category, total: Double)] {
+    var expensesByCategory: [(category: UserCategory, total: Double)] {
         let expenses = transactions.filter { $0.type == .expense }
-        let grouped = Dictionary(grouping: expenses, by: \.category)
+        let grouped = Dictionary(grouping: expenses) { $0.userCategory }
         return grouped
-            .map { (category: $0.key, total: $0.value.reduce(0) { $0 + $1.amount }) }
+            .compactMap { (cat, txns) -> (category: UserCategory, total: Double)? in
+                guard let cat else { return nil }
+                return (category: cat, total: txns.reduce(0) { $0 + $1.amount })
+            }
             .sorted { $0.total > $1.total }
     }
 

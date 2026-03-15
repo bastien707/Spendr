@@ -6,8 +6,8 @@ struct TransactionRow: View {
     var body: some View {
         HStack(spacing: DS.Spacing.md) {
             CategoryIcon(
-                systemName: transaction.category.icon,
-                color: transaction.category.color,
+                systemName: transaction.categoryIcon,
+                color: transaction.categoryColor,
                 size: DS.IconSize.md
             )
 
@@ -15,7 +15,7 @@ struct TransactionRow: View {
                 Text(transaction.title)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                Text(transaction.category.rawValue)
+                Text(transaction.categoryName)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

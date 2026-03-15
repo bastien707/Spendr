@@ -5,13 +5,10 @@ struct AddCategoryBudgetView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
-    // For adding a new budget
-    var availableCategories: [Category] = []
-
-    // For editing an existing budget
+    var availableCategories: [UserCategory] = []
     var editingBudget: CategoryBudget? = nil
 
-    @State private var selectedCategory: Category = .food
+    @State private var selectedCategory: UserCategory?
     @State private var limitText: String = ""
 
     private var isEditing: Bool { editingBudget != nil }
@@ -20,21 +17,23 @@ struct AddCategoryBudgetView: View {
         Double(limitText.replacingOccurrences(of: ",", with: ".")) ?? 0
     }
 
-    private var isValid: Bool { limit > 0 }
+    private var isValid: Bool {
+        limit > 0 && (isEditing || selectedCategory != nil)
+    }
 
     var body: some View {
         NavigationStack {
             Form {
                 if isEditing, let budget = editingBudget {
                     Section("Category") {
-                        Label(budget.category.rawValue, systemImage: budget.category.icon)
+                        Label(budget.categoryName, systemImage: budget.categoryIcon)
                             .foregroundStyle(.primary)
                     }
                 } else {
                     Section("Category") {
                         Picker("Category", selection: $selectedCategory) {
-                            ForEach(availableCategories, id: \.self) { cat in
-                                Label(cat.rawValue, systemImage: cat.icon).tag(cat)
+                            ForEach(availableCategories) { cat in
+                                Label(cat.name, systemImage: cat.icon).tag(Optional(cat))
                             }
                         }
                         .pickerStyle(.wheel)
@@ -43,8 +42,7 @@ struct AddCategoryBudgetView: View {
 
                 Section("Monthly limit") {
                     HStack {
-                        Text("€")
-                            .foregroundStyle(.secondary)
+                        Text("€").foregroundStyle(.secondary)
                         TextField("e.g. 300", text: $limitText)
                             .keyboardType(.decimalPad)
                     }
@@ -52,8 +50,7 @@ struct AddCategoryBudgetView: View {
 
                 Section {
                     Text("Expenses in this category will count against this monthly limit.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(.caption).foregroundStyle(.secondary)
                 }
             }
             .navigationTitle(isEditing ? "Edit Budget" : "New Category Budget")
@@ -61,8 +58,8 @@ struct AddCategoryBudgetView: View {
             .onAppear {
                 if let budget = editingBudget {
                     limitText = String(budget.monthlyLimit)
-                } else if let first = availableCategories.first {
-                    selectedCategory = first
+                } else {
+                    selectedCategory = availableCategories.first
                 }
             }
             .toolbar {
@@ -81,11 +78,8 @@ struct AddCategoryBudgetView: View {
     private func save() {
         if let budget = editingBudget {
             budget.monthlyLimit = limit
-        } else {
-            let newBudget = CategoryBudget(
-                category: selectedCategory,
-                monthlyLimit: limit
-            )
+        } else if let selectedCategory {
+            let newBudget = CategoryBudget(category: selectedCategory, monthlyLimit: limit)
             modelContext.insert(newBudget)
         }
         dismiss()
