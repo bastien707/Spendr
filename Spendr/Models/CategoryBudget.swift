@@ -4,13 +4,13 @@ import SwiftData
 @Model
 final class CategoryBudget {
     var id: UUID
-    var category: Category
+    var userCategory: UserCategory?
     var monthlyLimit: Double
-    var month: Date // start of month
+    var month: Date
 
-    init(category: Category, monthlyLimit: Double, month: Date = Date()) {
+    init(category: UserCategory, monthlyLimit: Double, month: Date = Date()) {
         self.id = UUID()
-        self.category = category
+        self.userCategory = category
         self.monthlyLimit = monthlyLimit
         self.month = Calendar.current.startOfMonth(for: month)
     }

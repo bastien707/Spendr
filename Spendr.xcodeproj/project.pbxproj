@@ -19,6 +19,11 @@
 		A010 /* BudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B010 /* BudgetView.swift */; };
 		A011 /* AddCategoryBudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B011 /* AddCategoryBudgetView.swift */; };
 		A012 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B012 /* DesignSystem.swift */; };
+		A013 /* UserCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B013 /* UserCategory.swift */; };
+		A014 /* CategorySeeder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B014 /* CategorySeeder.swift */; };
+		A015 /* UserCategory+Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = B015 /* UserCategory+Defaults.swift */; };
+		A016 /* CategoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B016 /* CategoriesView.swift */; };
+		A017 /* AddCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B017 /* AddCategoryView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +39,11 @@
 		B010 /* BudgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetView.swift; sourceTree = "<group>"; };
 		B011 /* AddCategoryBudgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCategoryBudgetView.swift; sourceTree = "<group>"; };
 		B012 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
+		B013 /* UserCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCategory.swift; sourceTree = "<group>"; };
+		B014 /* CategorySeeder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySeeder.swift; sourceTree = "<group>"; };
+		B015 /* UserCategory+Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserCategory+Defaults.swift"; sourceTree = "<group>"; };
+		B016 /* CategoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesView.swift; sourceTree = "<group>"; };
+		B017 /* AddCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCategoryView.swift; sourceTree = "<group>"; };
 		PROD /* Spendr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Spendr.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -89,6 +99,9 @@
 			children = (
 				B003,
 				B009,
+				B013,
+				B014,
+				B015,
 			);
 			path = Models;
 
@@ -111,6 +124,8 @@
 				B008,
 				B010,
 				B011,
+				B016,
+				B017,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -187,6 +202,11 @@
 				A010,
 				A011,
 				A012,
+				A013,
+				A014,
+				A015,
+				A016,
+				A017,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
