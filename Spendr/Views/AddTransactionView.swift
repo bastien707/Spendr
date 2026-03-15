@@ -4,16 +4,17 @@ import SwiftData
 struct AddTransactionView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Query(sort: \UserCategory.sortOrder) private var allCategories: [UserCategory]
 
     @State private var title = ""
     @State private var amountText = ""
     @State private var type: TransactionType = .expense
-    @State private var category: Category = .food
+    @State private var selectedCategory: UserCategory?
     @State private var date = Date()
     @State private var note = ""
 
-    private var availableCategories: [Category] {
-        Category.allCases.filter { $0.type == type }
+    private var availableCategories: [UserCategory] {
+        allCategories.filter { $0.type == type }
     }
 
     private var amount: Double {
@@ -21,7 +22,7 @@ struct AddTransactionView: View {
     }
 
     private var isValid: Bool {
-        !title.isEmpty && amount > 0
+        !title.isEmpty && amount > 0 && selectedCategory != nil
     }
 
     var body: some View {
@@ -41,14 +42,14 @@ struct AddTransactionView: View {
                     }
                     .pickerStyle(.segmented)
                     .onChange(of: type) {
-                        if !availableCategories.contains(category) {
-                            category = availableCategories.first ?? .other
+                        if let sel = selectedCategory, sel.type != type {
+                            selectedCategory = availableCategories.first
                         }
                     }
 
-                    Picker("Category", selection: $category) {
-                        ForEach(availableCategories, id: \.self) { cat in
-                            Label(cat.rawValue, systemImage: cat.icon).tag(cat)
+                    Picker("Category", selection: $selectedCategory) {
+                        ForEach(availableCategories) { cat in
+                            Label(cat.name, systemImage: cat.icon).tag(Optional(cat))
                         }
                     }
                 }
@@ -61,6 +62,11 @@ struct AddTransactionView: View {
             }
             .navigationTitle("New Transaction")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                if selectedCategory == nil {
+                    selectedCategory = availableCategories.first
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -75,11 +81,12 @@ struct AddTransactionView: View {
     }
 
     private func save() {
+        guard let selectedCategory else { return }
         let transaction = Transaction(
             title: title,
             amount: amount,
             type: type,
-            category: category,
+            category: selectedCategory,
             date: date,
             note: note
         )

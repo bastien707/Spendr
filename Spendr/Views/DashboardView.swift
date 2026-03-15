@@ -21,11 +21,14 @@ struct DashboardView: View {
 
     private var balance: Double { totalIncome - totalExpenses }
 
-    private var expensesByCategory: [(category: Category, total: Double)] {
+    private var expensesByCategory: [(category: UserCategory, total: Double)] {
         let expenses = monthTransactions.filter { $0.type == .expense }
-        let grouped = Dictionary(grouping: expenses, by: \.category)
+        let grouped = Dictionary(grouping: expenses) { $0.userCategory }
         return grouped
-            .map { (category: $0.key, total: $0.value.reduce(0) { $0 + $1.amount }) }
+            .compactMap { (cat, txns) -> (category: UserCategory, total: Double)? in
+                guard let cat else { return nil }
+                return (category: cat, total: txns.reduce(0) { $0 + $1.amount })
+            }
             .sorted { $0.total > $1.total }
     }
 
@@ -80,33 +83,18 @@ struct DashboardView: View {
 
     private var incomeExpenseRow: some View {
         HStack(spacing: DS.Spacing.md) {
-            miniSummaryCard(
-                title: "Income",
-                amount: totalIncome,
-                icon: SFSymbol.income,
-                color: .green
-            )
-            miniSummaryCard(
-                title: "Expenses",
-                amount: totalExpenses,
-                icon: SFSymbol.expense,
-                color: .red
-            )
+            miniSummaryCard(title: "Income", amount: totalIncome, icon: SFSymbol.income, color: .green)
+            miniSummaryCard(title: "Expenses", amount: totalExpenses, icon: SFSymbol.expense, color: .red)
         }
     }
 
     private func miniSummaryCard(title: String, amount: Double, icon: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: DS.Spacing.sm) {
             HStack(spacing: DS.Spacing.xs) {
-                Image(systemName: icon)
-                    .foregroundStyle(color)
-                Text(title)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                Image(systemName: icon).foregroundStyle(color)
+                Text(title).font(.subheadline).foregroundStyle(.secondary)
             }
-            Text(amount, format: .currency(code: "EUR"))
-                .font(.headline)
-                .fontWeight(.semibold)
+            Text(amount, format: .currency(code: "EUR")).font(.headline).fontWeight(.semibold)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .cardStyle(radius: DS.Radius.md)
@@ -116,7 +104,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: DS.Spacing.md) {
             SectionHeader(title: "Spending by Category")
 
-            Chart(expensesByCategory, id: \.category) { item in
+            Chart(expensesByCategory, id: \.category.id) { item in
                 SectorMark(
                     angle: .value("Amount", item.total),
                     innerRadius: .ratio(0.55),
@@ -128,15 +116,14 @@ struct DashboardView: View {
             .frame(height: 220)
 
             VStack(spacing: DS.Spacing.sm) {
-                ForEach(expensesByCategory, id: \.category) { item in
+                ForEach(expensesByCategory, id: \.category.id) { item in
                     HStack(spacing: DS.Spacing.sm) {
                         CategoryIcon(systemName: item.category.icon, color: item.category.color, size: DS.IconSize.sm)
-                        Text(item.category.rawValue)
+                        Text(item.category.name)
                             .font(.subheadline)
                         Spacer()
                         Text(item.total, format: .currency(code: "EUR"))
-                            .font(.subheadline)
-                            .fontWeight(.medium)
+                            .font(.subheadline).fontWeight(.medium)
                     }
                 }
             }
@@ -149,12 +136,8 @@ struct DashboardView: View {
             SectionHeader(title: "Recent")
 
             if monthTransactions.isEmpty {
-                EmptyStateView(
-                    icon: SFSymbol.empty,
-                    title: "No transactions yet",
-                    message: "Tap + to record your first one."
-                )
-                .frame(height: 120)
+                EmptyStateView(icon: SFSymbol.empty, title: "No transactions yet", message: "Tap + to record your first one.")
+                    .frame(height: 120)
             } else {
                 ForEach(monthTransactions.prefix(5)) { transaction in
                     TransactionRow(transaction: transaction)

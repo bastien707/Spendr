@@ -23,17 +23,22 @@ enum SFSymbol {
     static let expense = "arrow.up.right.circle.fill"
 
     // MARK: Categories
-    enum Category {
-        static let food          = "fork.knife"
-        static let transport     = "car.fill"
-        static let housing       = "house.fill"
-        static let health        = "cross.case.fill"
-        static let entertainment = "popcorn.fill"
-        static let shopping      = "cart.fill"
-        static let salary        = "banknote.fill"
-        static let freelance     = "laptopcomputer"
-        static let other         = "square.grid.2x2.fill"
-    }
+    static let manageCategories = "folder.badge.gearshape"
+
+    /// Icons available in the category icon picker.
+    static let categoryPickerIcons: [String] = [
+        "fork.knife", "cup.and.saucer.fill", "cart.fill", "bag.fill",
+        "car.fill", "bus.fill", "airplane", "fuelpump.fill",
+        "house.fill", "building.2.fill", "lightbulb.fill", "wifi",
+        "cross.case.fill", "heart.fill", "pills.fill", "figure.run",
+        "popcorn.fill", "gamecontroller.fill", "music.note", "book.fill",
+        "banknote.fill", "creditcard.fill", "dollarsign.circle.fill",
+        "laptopcomputer", "desktopcomputer", "wrench.fill",
+        "graduationcap.fill", "pawprint.fill", "leaf.fill", "drop.fill",
+        "gift.fill", "tshirt.fill", "scissors", "paintbrush.fill",
+        "camera.fill", "globe", "star.fill", "square.grid.2x2.fill",
+        "ellipsis.circle.fill", "questionmark.circle.fill",
+    ]
 
     // MARK: States
     static let empty       = "tray.fill"
@@ -65,6 +70,14 @@ enum DS {
         static let md: CGFloat = 44
         static let lg: CGFloat = 60
     }
+
+    /// Preset colors available in the category color picker.
+    static let categoryColorPalette: [String] = [
+        "#FF3B30", "#FF9500", "#FFCC00", "#34C759",
+        "#00C7BE", "#5AC8FA", "#007AFF", "#5856D6",
+        "#AF52DE", "#FF2D55", "#A2845E", "#8E8E93",
+        "#FF6B35", "#2D7D9A", "#6B5B95", "#88B04B",
+    ]
 }
 
 // MARK: - ViewModifiers
@@ -157,6 +170,21 @@ struct EmptyStateView: View {
         }
         .padding(.horizontal, 32)
         .frame(maxHeight: .infinity)
+    }
+}
+
+// MARK: - Color hex extension
+
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
+        let scanner = Scanner(string: hex)
+        var rgbValue: UInt64 = 0
+        scanner.scanHexInt64(&rgbValue)
+        let r = Double((rgbValue & 0xFF0000) >> 16) / 255.0
+        let g = Double((rgbValue & 0x00FF00) >> 8) / 255.0
+        let b = Double(rgbValue & 0x0000FF) / 255.0
+        self.init(red: r, green: g, blue: b)
     }
 }
 
