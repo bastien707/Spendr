@@ -15,6 +15,8 @@
 		A006 /* TransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B006 /* TransactionsView.swift */; };
 		A007 /* AddTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B007 /* AddTransactionView.swift */; };
 		A008 /* TransactionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B008 /* TransactionRow.swift */; };
+		A009 /* Budget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B009 /* Budget.swift */; };
+		A010 /* BudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B010 /* BudgetView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +28,8 @@
 		B006 /* TransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsView.swift; sourceTree = "<group>"; };
 		B007 /* AddTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTransactionView.swift; sourceTree = "<group>"; };
 		B008 /* TransactionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRow.swift; sourceTree = "<group>"; };
+		B009 /* Budget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Budget.swift; sourceTree = "<group>"; };
+		B010 /* BudgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetView.swift; sourceTree = "<group>"; };
 		PROD /* Spendr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Spendr.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -71,6 +75,7 @@
 			isa = PBXGroup;
 			children = (
 				B003,
+				B009,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -90,6 +95,7 @@
 				B006,
 				B007,
 				B008,
+				B010,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -162,6 +168,8 @@
 				A006,
 				A007,
 				A008,
+				A009,
+				A010,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
