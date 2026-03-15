@@ -12,6 +12,11 @@ struct ContentView: View {
                 .tabItem {
                     Label("Transactions", systemImage: "list.bullet.rectangle.fill")
                 }
+
+            BudgetView()
+                .tabItem {
+                    Label("Budget", systemImage: "target")
+                }
         }
     }
 }
