@@ -2,14 +2,16 @@ import Foundation
 import SwiftData
 
 @Model
-final class Budget {
+final class CategoryBudget {
     var id: UUID
-    var monthlyIncome: Double
-    var month: Date // stored as start of month
+    var category: Category
+    var monthlyLimit: Double
+    var month: Date // start of month
 
-    init(monthlyIncome: Double, month: Date = Date()) {
+    init(category: Category, monthlyLimit: Double, month: Date = Date()) {
         self.id = UUID()
-        self.monthlyIncome = monthlyIncome
+        self.category = category
+        self.monthlyLimit = monthlyLimit
         self.month = Calendar.current.startOfMonth(for: month)
     }
 }

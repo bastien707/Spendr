@@ -7,6 +7,6 @@ struct SpendrApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [Transaction.self, Budget.self])
+        .modelContainer(for: [Transaction.self, CategoryBudget.self])
     }
 }
