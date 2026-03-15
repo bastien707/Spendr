@@ -28,6 +28,7 @@
 		A019 /* SupabaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B019 /* SupabaseClient.swift */; };
 		A020 /* SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B020 /* SyncService.swift */; };
 		A021 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B021 /* AccountView.swift */; };
+		A022 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B022 /* LoginView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +53,7 @@
 		B019 /* SupabaseClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseClient.swift; sourceTree = "<group>"; };
 		B020 /* SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncService.swift; sourceTree = "<group>"; };
 		B021 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		B022 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		PROD /* Spendr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Spendr.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -146,6 +148,7 @@
 				B016,
 				B017,
 				B021,
+				B022,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -231,6 +234,7 @@
 				A019,
 				A020,
 				A021,
+				A022,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -431,6 +431,23 @@ When adding a new feature, follow these steps in order:
 
 ---
 
+## Build Verification (Mandatory)
+
+After **every code change** (new files, modified files, refactors), you **must**:
+
+1. Build the project:
+   ```bash
+   xcodebuild build \
+     -project Spendr.xcodeproj \
+     -scheme Spendr \
+     -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.0' \
+     CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO 2>&1 | tail -20
+   ```
+2. If the build **fails**, read the error output, identify the root cause, and fix it immediately
+3. Repeat until the build succeeds — do not consider a task complete until it compiles
+
+---
+
 ## Hard Constraints
 
 These are absolute limits regardless of context:
