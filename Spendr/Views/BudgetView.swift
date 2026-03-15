@@ -114,7 +114,7 @@ struct BudgetView: View {
                         .font(.subheadline).foregroundStyle(.secondary)
                     Text(totalRemaining, format: .currency(code: "EUR"))
                         .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundStyle(totalRemaining >= 0 ? .primary : .red)
+                        .foregroundStyle(totalRemaining >= 0 ? Color.primary : Color.red)
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 4) {
@@ -234,10 +234,10 @@ struct CategoryBudgetRow: View {
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(remaining >= 0 ? remaining : abs(remaining), format: .currency(code: "EUR"))
                         .font(.subheadline).fontWeight(.semibold)
-                        .foregroundStyle(remaining >= 0 ? .primary : .red)
+                        .foregroundStyle(remaining >= 0 ? Color.primary : Color.red)
                     Text(remaining >= 0 ? "left" : "over budget")
                         .font(.caption2)
-                        .foregroundStyle(remaining >= 0 ? .secondary : .red)
+                        .foregroundStyle(remaining >= 0 ? Color.secondary : Color.red)
                 }
             }
 
