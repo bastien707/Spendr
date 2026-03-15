@@ -162,6 +162,220 @@ Large views use **private computed properties** to extract subviews (not separat
 
 ---
 
+## Swift & SwiftUI Code Conventions
+
+These rules are **mandatory**. Always follow them when reading, writing, or modifying any Swift file in this project.
+
+### A — Property Declaration Order
+
+Inside every `View` struct, always declare properties in this exact order:
+
+```swift
+struct MyView: View {
+    // 1. @Environment
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+
+    // 2. @Query
+    @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
+
+    // 3. @State
+    @State private var showingAddTransaction = false
+    @State private var searchText = ""
+
+    // 4. Private computed properties (last)
+    private var filtered: [Transaction] { ... }
+    private var isValid: Bool { ... }
+}
+```
+
+### B — View Decomposition
+
+- `body` must only orchestrate layout — no inline logic, no long chains of closures
+- Extract subviews as `private var name: some View { ... }`
+- Parameterized subviews use `private func name(...) -> some View { ... }`
+- If a subview is used in **more than one file**, move it to `DesignSystem.swift`
+- Never create a new `.swift` file for a subview used in only one place
+
+```swift
+// CORRECT
+var body: some View {
+    VStack {
+        balanceCard
+        recentTransactions
+    }
+}
+
+private var balanceCard: some View {
+    // implementation here
+}
+
+// WRONG — complex logic inline in body
+var body: some View {
+    VStack {
+        VStack {
+            Text(transactions.reduce(0) { $0 + $1.amount }.formatted(.currency(code: "EUR")))
+            // ... 20 more lines
+        }
+    }
+}
+```
+
+### C — SwiftUI Modifier Ordering
+
+Apply modifiers in this order on any view:
+
+```swift
+SomeView()
+    // 1. Layout
+    .frame(maxWidth: .infinity)
+    .padding(.horizontal, DS.Spacing.md)
+    // 2. Appearance
+    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: DS.Radius.md))
+    .foregroundStyle(.primary)
+    // 3. Typography
+    .font(.headline)
+    .fontWeight(.semibold)
+    // 4. Interaction
+    .onTapGesture { ... }
+    .onChange(of: value) { ... }
+    .swipeActions { ... }
+    // 5. Presentation
+    .sheet(isPresented: $showingSheet) { ... }
+    .toolbar { ... }
+    .navigationTitle("Title")
+```
+
+### D — Naming Conventions
+
+| Pattern | Rule | Examples |
+|---|---|---|
+| Bool state | `isXxx` | `isEditing`, `isValid`, `isEmpty` |
+| Bool presentation | `showingXxx` | `showingAddTransaction`, `showingDeleteAlert` |
+| `@Query` collections | Plural noun | `transactions`, `categoryBudgets` |
+| Computed aggregates | Descriptive noun | `monthTransactions`, `totalIncome`, `filtered` |
+| Action functions | Imperative verb | `save()`, `deleteItems()`, `resetForm()` |
+| View helper functions | Verb phrase with label | `spent(for:)`, `progressColor(for:)` |
+| Types & Enums | PascalCase | `TransactionType`, `CategoryBudget` |
+| Design system enums | Short PascalCase | `DS`, `SFSymbol` |
+
+### E — Access Control
+
+Always apply the most restrictive access level possible:
+
+- `@State`, `@Environment`, `@Query` → always `private`
+- Subview computed properties → always `private var`
+- Helper functions inside a view → always `private func`
+- `@Model` properties → **no modifier** (SwiftData requires implicit internal access for persistence)
+- `@Observable` ViewModel properties → no modifier (internal, intentional public surface)
+
+```swift
+// CORRECT
+@Environment(\.modelContext) private var modelContext
+@State private var isEditing = false
+private var summaryCard: some View { ... }
+private func save() { ... }
+
+// WRONG
+@State var isEditing = false          // missing private
+var summaryCard: some View { ... }    // missing private
+```
+
+### F — SwiftData Patterns
+
+```swift
+// READ — always via @Query at view level, never inside ViewModel
+@Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
+
+// WRITE — insert and delete only, never mutate arrays
+modelContext.insert(newTransaction)
+modelContext.delete(transaction)
+
+// FILTER — prefer @Query predicate over Array.filter for large datasets
+@Query(filter: #Predicate<Transaction> { $0.type == .expense })
+private var expenses: [Transaction]
+```
+
+Rules:
+- `@Query` is declared at the **view level only** — never inside a ViewModel or helper
+- One `ModelContainer` in `SpendrApp.swift` — never instantiate another
+- Never call `try? modelContext.save()` manually — SwiftData auto-saves
+
+### G — No Business Logic in Views
+
+| Logic type | Where it lives |
+|---|---|
+| Date arithmetic, month boundaries | `Calendar` extensions (`CategoryBudget.swift`) |
+| Aggregates (totals, grouping, balance) | `TransactionViewModel` |
+| Filtering beyond simple `@Query` | ViewModel computed property |
+| Currency / date formatting | Inline `.formatted()` call in view (acceptable) |
+| Form validation | `private var isValid: Bool` computed property in the view |
+
+Views only **display** data — they never compute derived business values from scratch.
+
+### H — MARK Section Structure
+
+Every View file must use these MARK comments in this order:
+
+```swift
+struct MyView: View {
+
+    // ... properties ...
+
+    // MARK: - Body
+    var body: some View { ... }
+
+    // MARK: - Subviews
+    private var subviewName: some View { ... }
+
+    // MARK: - Helpers
+    private func helperName() { ... }
+}
+```
+
+Omit a section only if it has zero content. `// MARK: - Body` is always required.
+
+### I — Anti-Patterns
+
+Never do any of the following:
+
+| Anti-pattern | Correct alternative |
+|---|---|
+| Hardcoded color literal (`.red`, `Color(hex:)`) | `category.color` or a semantic system color |
+| Hardcoded SF Symbol string (`"plus.circle.fill"`) | `SFSymbol.add` from the catalog |
+| Hardcoded spacing number (`.padding(16)`) | `DS.Spacing.md` |
+| Hardcoded corner radius (`.cornerRadius(12)`) | `DS.Radius.sm` |
+| `Core Data` (`NSManagedObject`, `NSFetchRequest`) | SwiftData (`@Model`, `@Query`) |
+| `UserDefaults` for model data | SwiftData |
+| `DispatchQueue.main.async { }` | SwiftUI/SwiftData dispatch automatically |
+| Force-unwrap `someOptional!` | `guard let`, `if let`, or `?? defaultValue` |
+| `AnyView(...)` type erasure | `@ViewBuilder` or `Group { if ... }` |
+| Third-party dependency for built-in capability | Apple framework (Charts, SwiftData, etc.) |
+
+### J — Git & Branching (Trunk-Based Development)
+
+This project uses **trunk-based development**. The rules are:
+
+- `main` is the single long-lived branch — it must always be in a deployable state
+- All work happens on short-lived branches cut from `main`: `claude/<feature>` or `kebab-case-feature`
+- Branches are merged to `main` via PR — **never commit directly to `main`**
+- CI (build + test) must pass before any merge
+- Delete the feature branch immediately after merging
+- No long-lived `dev`, `staging`, `release`, or `hotfix` branches
+
+**Commit message format** — conventional commits, imperative present tense:
+
+```
+feat: add spending chart to dashboard
+fix: correct budget progress bar threshold
+docs: update CLAUDE.md with SwiftData patterns
+refactor: extract CategoryIcon into DesignSystem
+test: add unit tests for TransactionViewModel
+chore: update Xcode project settings
+```
+
+---
+
 ## Development Workflow
 
 ### Building & Running
@@ -195,12 +409,6 @@ Steps: checkout → select Xcode 15.4 → build → test (on macOS 14 runner, iP
 
 In-progress CI runs are cancelled automatically when a new push arrives on the same branch.
 
-### Branching Strategy
-
-- `main` is the protected trunk branch.
-- Feature branches: `claude/<feature-name>` or descriptive kebab-case names.
-- Open a PR against `main`; CI must pass before merging.
-
 ### Pull Requests
 
 Use the template at `.github/pull_request_template.md`. Required sections:
@@ -223,12 +431,11 @@ When adding a new feature, follow these steps in order:
 
 ---
 
-## What NOT to Do
+## Hard Constraints
 
-- Do not add third-party dependencies unless absolutely necessary; prefer Apple frameworks.
-- Do not hardcode SF Symbol strings — always use `SFSymbol.<name>.rawValue`.
-- Do not hardcode spacing, radius, or icon sizes — use `DS.Spacing`, `DS.Radius`, `DS.IconSize`.
-- Do not use Core Data — this project uses SwiftData.
-- Do not target iOS < 17 — the app uses SwiftData and modern SwiftUI APIs that require iOS 17+.
-- Do not add a backend or network layer without explicit discussion; the app is intentionally offline-only.
-- Do not add `Codable` conformance to SwiftData `@Model` classes without careful consideration (SwiftData manages serialization).
+These are absolute limits regardless of context:
+
+- **iOS 17+ only** — the app uses SwiftData and modern SwiftUI APIs; never lower the deployment target
+- **No network layer** — the app is intentionally offline-only; do not add URLSession, Alamofire, or any HTTP client without explicit discussion
+- **No third-party packages** — all needed frameworks (Charts, SwiftData, SwiftUI) are Apple built-ins
+- **No `Codable` on `@Model` classes** — SwiftData manages serialization; adding `Codable` causes conflicts
