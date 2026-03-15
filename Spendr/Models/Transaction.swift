@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SwiftUI
 
 enum TransactionType: String, Codable, CaseIterable {
     case expense = "Expense"
@@ -19,15 +20,29 @@ enum Category: String, Codable, CaseIterable {
 
     var icon: String {
         switch self {
-        case .food: return "fork.knife"
-        case .transport: return "car.fill"
-        case .housing: return "house.fill"
-        case .health: return "heart.fill"
-        case .entertainment: return "gamecontroller.fill"
-        case .shopping: return "bag.fill"
-        case .salary: return "briefcase.fill"
-        case .freelance: return "laptopcomputer"
-        case .other: return "ellipsis.circle.fill"
+        case .food:          return SFSymbol.Category.food
+        case .transport:     return SFSymbol.Category.transport
+        case .housing:       return SFSymbol.Category.housing
+        case .health:        return SFSymbol.Category.health
+        case .entertainment: return SFSymbol.Category.entertainment
+        case .shopping:      return SFSymbol.Category.shopping
+        case .salary:        return SFSymbol.Category.salary
+        case .freelance:     return SFSymbol.Category.freelance
+        case .other:         return SFSymbol.Category.other
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .food:          return .orange
+        case .transport:     return .blue
+        case .housing:       return .purple
+        case .health:        return .red
+        case .entertainment: return .pink
+        case .shopping:      return .teal
+        case .salary:        return .green
+        case .freelance:     return .indigo
+        case .other:         return .gray
         }
     }
 

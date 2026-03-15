@@ -32,7 +32,7 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: DS.Spacing.lg) {
                     balanceCard
                     incomeExpenseRow
                     if !expensesByCategory.isEmpty {
@@ -40,7 +40,7 @@ struct DashboardView: View {
                     }
                     recentTransactions
                 }
-                .padding()
+                .padding(DS.Spacing.md)
             }
             .navigationTitle("Spendr")
             .toolbar {
@@ -48,7 +48,7 @@ struct DashboardView: View {
                     Button {
                         showingAddTransaction = true
                     } label: {
-                        Image(systemName: "plus.circle.fill")
+                        Image(systemName: SFSymbol.add)
                             .font(.title2)
                     }
                 }
@@ -59,52 +59,62 @@ struct DashboardView: View {
         }
     }
 
+    // MARK: - Subviews
+
     private var balanceCard: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: DS.Spacing.sm) {
             Text("Balance")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-            Text(balance, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+            Text(balance, format: .currency(code: "EUR"))
                 .font(.system(size: 42, weight: .bold, design: .rounded))
-                .foregroundStyle(balance >= 0 ? .green : .red)
+                .foregroundStyle(balance >= 0 ? Color.green : Color.red)
             Text("This month")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 24)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .padding(.vertical, DS.Spacing.xl)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: DS.Radius.lg))
     }
 
     private var incomeExpenseRow: some View {
-        HStack(spacing: 16) {
-            summaryCard(title: "Income", amount: totalIncome, color: .green, icon: "arrow.down.circle.fill")
-            summaryCard(title: "Expenses", amount: totalExpenses, color: .red, icon: "arrow.up.circle.fill")
+        HStack(spacing: DS.Spacing.md) {
+            miniSummaryCard(
+                title: "Income",
+                amount: totalIncome,
+                icon: SFSymbol.income,
+                color: .green
+            )
+            miniSummaryCard(
+                title: "Expenses",
+                amount: totalExpenses,
+                icon: SFSymbol.expense,
+                color: .red
+            )
         }
     }
 
-    private func summaryCard(title: String, amount: Double, color: Color, icon: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
+    private func miniSummaryCard(title: String, amount: Double, icon: String, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+            HStack(spacing: DS.Spacing.xs) {
                 Image(systemName: icon)
                     .foregroundStyle(color)
                 Text(title)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
-            Text(amount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+            Text(amount, format: .currency(code: "EUR"))
                 .font(.headline)
                 .fontWeight(.semibold)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .cardStyle(radius: DS.Radius.md)
     }
 
     private var categoryChart: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Spending by Category")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: DS.Spacing.md) {
+            SectionHeader(title: "Spending by Category")
 
             Chart(expensesByCategory, id: \.category) { item in
                 SectorMark(
@@ -113,47 +123,44 @@ struct DashboardView: View {
                     angularInset: 2
                 )
                 .cornerRadius(4)
-                .foregroundStyle(by: .value("Category", item.category.rawValue))
+                .foregroundStyle(item.category.color)
             }
             .frame(height: 220)
 
-            VStack(spacing: 8) {
+            VStack(spacing: DS.Spacing.sm) {
                 ForEach(expensesByCategory, id: \.category) { item in
-                    HStack {
-                        Image(systemName: item.category.icon)
-                            .frame(width: 20)
+                    HStack(spacing: DS.Spacing.sm) {
+                        CategoryIcon(systemName: item.category.icon, color: item.category.color, size: DS.IconSize.sm)
                         Text(item.category.rawValue)
                             .font(.subheadline)
                         Spacer()
-                        Text(item.total, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                        Text(item.total, format: .currency(code: "EUR"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                     }
                 }
             }
         }
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .cardStyle()
     }
 
     private var recentTransactions: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Recent")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: DS.Spacing.md) {
+            SectionHeader(title: "Recent")
 
             if monthTransactions.isEmpty {
-                Text("No transactions yet. Tap + to add one.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding()
+                EmptyStateView(
+                    icon: SFSymbol.empty,
+                    title: "No transactions yet",
+                    message: "Tap + to record your first one."
+                )
+                .frame(height: 120)
             } else {
                 ForEach(monthTransactions.prefix(5)) { transaction in
                     TransactionRow(transaction: transaction)
                 }
             }
         }
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .cardStyle()
     }
 }
