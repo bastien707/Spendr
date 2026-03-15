@@ -45,6 +45,15 @@ enum SFSymbol {
     static let warning     = "exclamationmark.triangle.fill"
     static let success     = "checkmark.circle.fill"
     static let overBudget  = "exclamationmark.circle.fill"
+
+    // MARK: Auth
+    enum Auth {
+        static let apple   = "apple.logo"
+        static let google  = "g.circle.fill"
+        static let account = "person.circle.fill"
+        static let sync    = "arrow.triangle.2.circlepath"
+        static let signOut = "rectangle.portrait.and.arrow.right"
+    }
 }
 
 // MARK: - Design tokens

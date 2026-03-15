@@ -4,6 +4,7 @@ import SwiftData
 struct AddCategoryBudgetView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(SyncService.self) private var syncService
 
     var availableCategories: [UserCategory] = []
     var editingBudget: CategoryBudget? = nil
@@ -78,10 +79,12 @@ struct AddCategoryBudgetView: View {
     private func save() {
         if let budget = editingBudget {
             budget.monthlyLimit = limit
+            budget.needsSync = true
         } else if let selectedCategory {
             let newBudget = CategoryBudget(category: selectedCategory, monthlyLimit: limit)
             modelContext.insert(newBudget)
         }
+        Task { await syncService.sync() }
         dismiss()
     }
 }

@@ -16,6 +16,8 @@ final class Transaction {
     var userCategory: UserCategory?
     var date: Date
     var note: String
+    var ownerID: String = ""
+    var needsSync: Bool = true
 
     init(
         title: String,

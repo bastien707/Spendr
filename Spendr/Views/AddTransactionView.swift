@@ -4,6 +4,7 @@ import SwiftData
 struct AddTransactionView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(SyncService.self) private var syncService
     @Query(sort: \UserCategory.sortOrder) private var allCategories: [UserCategory]
 
     @State private var title = ""
@@ -91,6 +92,7 @@ struct AddTransactionView: View {
             note: note
         )
         modelContext.insert(transaction)
+        Task { await syncService.sync() }
         dismiss()
     }
 }

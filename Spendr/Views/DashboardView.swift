@@ -5,6 +5,7 @@ import Charts
 struct DashboardView: View {
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @State private var showingAddTransaction = false
+    @State private var showingAccount = false
     @State private var viewModel = TransactionViewModel()
 
     private var monthTransactions: [Transaction] {
@@ -55,9 +56,20 @@ struct DashboardView: View {
                             .font(.title2)
                     }
                 }
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showingAccount = true
+                    } label: {
+                        Image(systemName: SFSymbol.Auth.account)
+                            .font(.title2)
+                    }
+                }
             }
             .sheet(isPresented: $showingAddTransaction) {
                 AddTransactionView()
+            }
+            .sheet(isPresented: $showingAccount) {
+                AccountView()
             }
         }
     }

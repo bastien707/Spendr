@@ -2,10 +2,11 @@ import SwiftUI
 import SwiftData
 
 struct BudgetView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(SyncService.self) private var syncService
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query private var categoryBudgets: [CategoryBudget]
     @Query(sort: \UserCategory.sortOrder) private var allCategories: [UserCategory]
-    @Environment(\.modelContext) private var modelContext
 
     @State private var showingAddBudget = false
     @State private var budgetToEdit: CategoryBudget? = nil
@@ -131,13 +132,15 @@ struct BudgetView: View {
         VStack(alignment: .leading, spacing: DS.Spacing.sm) {
             SectionHeader(title: "Categories")
 
-            ForEach(currentBudgets.sorted { ($0.categoryName) < ($1.categoryName) }) { budget in
+            ForEach(currentBudgets.sorted { $0.categoryName < $1.categoryName }) { budget in
                 if let cat = budget.userCategory {
                     CategoryBudgetRow(budget: budget, spent: spent(for: cat))
                         .contentShape(Rectangle())
                         .onTapGesture { budgetToEdit = budget }
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button(role: .destructive) {
+                                let id = budget.id
+                                Task { await syncService.deleteBudget(id: id) }
                                 modelContext.delete(budget)
                             } label: {
                                 Label("Delete", systemImage: SFSymbol.delete)

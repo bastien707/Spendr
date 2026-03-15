@@ -7,6 +7,8 @@ final class CategoryBudget {
     var userCategory: UserCategory?
     var monthlyLimit: Double
     var month: Date
+    var ownerID: String = ""
+    var needsSync: Bool = true
 
     init(category: UserCategory, monthlyLimit: Double, month: Date = Date()) {
         self.id = UUID()

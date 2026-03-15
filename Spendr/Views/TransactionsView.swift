@@ -2,8 +2,9 @@ import SwiftUI
 import SwiftData
 
 struct TransactionsView: View {
-    @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Environment(\.modelContext) private var modelContext
+    @Environment(SyncService.self) private var syncService
+    @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @State private var showingAddTransaction = false
     @State private var selectedFilter: TransactionType? = nil
     @State private var searchText = ""
@@ -83,7 +84,10 @@ struct TransactionsView: View {
 
     private func deleteItems(items: [Transaction], at offsets: IndexSet) {
         for index in offsets {
-            modelContext.delete(items[index])
+            let transaction = items[index]
+            let id = transaction.id
+            Task { await syncService.deleteTransaction(id: id) }
+            modelContext.delete(transaction)
         }
     }
 }
