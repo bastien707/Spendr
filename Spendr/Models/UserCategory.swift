@@ -4,13 +4,13 @@ import SwiftUI
 
 @Model
 final class UserCategory {
-    @Attribute(.unique) var id: UUID
-    var name: String
-    var icon: String
-    var colorHex: String
-    var type: TransactionType
-    var isDefault: Bool
-    var sortOrder: Int
+    var id: UUID = UUID()
+    var name: String = ""
+    var icon: String = ""
+    var colorHex: String = "#8E8E93"
+    var type: TransactionType = TransactionType.expense
+    var isDefault: Bool = false
+    var sortOrder: Int = 0
 
     @Relationship(inverse: \Transaction.userCategory)
     var transactions: [Transaction]? = []

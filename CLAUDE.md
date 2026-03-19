@@ -11,7 +11,7 @@ This file provides AI assistants with everything needed to understand, navigate,
 - **Platform**: iOS 17+
 - **Language**: Swift 5.9+
 - **UI Framework**: SwiftUI
-- **Persistence**: SwiftData (local SQLite, no external API)
+- **Persistence**: SwiftData with CloudKit sync (private database, automatic per-iCloud-account sync)
 - **Charts**: Apple Charts framework
 - **No package manager** (no CocoaPods, no SPM dependencies — all frameworks are Apple built-ins)
 
@@ -25,11 +25,15 @@ Spendr/
 │   ├── workflows/ci.yml             # CI pipeline (build + test on push/PR)
 │   └── pull_request_template.md     # PR checklist template
 ├── Spendr/                          # All source files
-│   ├── SpendrApp.swift              # @main entry point; registers SwiftData models
+│   ├── SpendrApp.swift              # @main entry point; registers SwiftData models + CloudKit
+│   ├── Spendr.entitlements          # iCloud/CloudKit entitlements
 │   ├── ContentView.swift            # Root TabView (Dashboard / Transactions / Budget)
 │   ├── Models/
-│   │   ├── Transaction.swift        # Transaction @Model + TransactionType + Category enums
-│   │   └── CategoryBudget.swift     # CategoryBudget @Model + Calendar extension
+│   │   ├── Transaction.swift        # Transaction @Model + TransactionType enum
+│   │   ├── CategoryBudget.swift     # CategoryBudget @Model + Calendar extension
+│   │   ├── UserCategory.swift       # UserCategory @Model (dynamic categories)
+│   │   ├── UserCategory+Defaults.swift  # Nil-safe convenience extensions
+│   │   └── CategorySeeder.swift     # Seeds 9 default categories on first launch
 │   ├── ViewModels/
 │   │   └── TransactionViewModel.swift  # @Observable ViewModel with computed aggregates
 │   ├── Views/
@@ -38,7 +42,9 @@ Spendr/
 │   │   ├── BudgetView.swift         # Per-category monthly budget management
 │   │   ├── AddTransactionView.swift # Form to create a transaction
 │   │   ├── AddCategoryBudgetView.swift  # Form to create or edit a budget
-│   │   └── TransactionRow.swift     # Reusable list row component
+│   │   ├── TransactionRow.swift     # Reusable list row component
+│   │   ├── CategoriesView.swift     # Category list with sections (Expense/Income)
+│   │   └── AddCategoryView.swift    # Create/edit category with icon & color picker
 │   └── DesignSystem/
 │       └── DesignSystem.swift       # All shared tokens, icons, and UI components
 └── Spendr.xcodeproj/                # Xcode project (no manual edits needed)
@@ -48,17 +54,19 @@ Spendr/
 
 ## Data Models
 
+All `@Model` properties **must have default values** (CloudKit requirement). The `init(...)` still sets them explicitly.
+
 ### Transaction (`Spendr/Models/Transaction.swift`)
 
 ```swift
 @Model final class Transaction {
-    var id: UUID
-    var title: String
-    var amount: Double         // Always positive; sign is determined by `type`
-    var type: TransactionType  // .income or .expense
-    var category: Category
-    var date: Date
-    var note: String
+    var id: UUID = UUID()
+    var title: String = ""
+    var amount: Double = 0     // Always positive; sign is determined by `type`
+    var type: TransactionType = .expense
+    var userCategory: UserCategory?
+    var date: Date = .now
+    var note: String = ""
 }
 ```
 
@@ -66,22 +74,47 @@ Spendr/
 
 ```swift
 @Model final class CategoryBudget {
-    var id: UUID
-    var category: Category
-    var monthlyLimit: Double
-    var month: Date            // Stored as first day of the month (startOfMonth)
+    var id: UUID = UUID()
+    var userCategory: UserCategory?
+    var monthlyLimit: Double = 0
+    var month: Date = .now     // Stored as first day of the month (startOfMonth)
 }
 ```
 
-### Category Enum
+### UserCategory (`Spendr/Models/UserCategory.swift`)
 
-Defined in `Transaction.swift`. Each case has:
-- `icon: String` — SF Symbol name (via `SFSymbol` catalog in DesignSystem)
-- `color: Color` — semantic color for that category
-- `type: TransactionType` — `.expense` or `.income`
+```swift
+@Model final class UserCategory {
+    var id: UUID = UUID()
+    var name: String = ""
+    var icon: String = ""          // SF Symbol name
+    var colorHex: String = "#8E8E93"
+    var type: TransactionType = .expense
+    var isDefault: Bool = false
+    var sortOrder: Int = 0
+    @Relationship(inverse: \Transaction.userCategory) var transactions: [Transaction]? = []
+    @Relationship(inverse: \CategoryBudget.userCategory) var budgets: [CategoryBudget]? = []
+}
+```
 
-Expense categories: `.food`, `.transport`, `.housing`, `.health`, `.entertainment`, `.shopping`, `.other`
-Income categories: `.salary`, `.freelance`
+9 default categories are seeded on first launch via `CategorySeeder`.
+
+---
+
+## CloudKit Sync
+
+Sync is handled entirely by SwiftData's built-in CloudKit integration — **no custom sync code**.
+
+```swift
+let config = ModelConfiguration("Spendr", schema: schema, cloudKitDatabase: .automatic)
+```
+
+Key rules:
+- Data is stored in the **private CloudKit database**, isolated per iCloud account — no auth UI needed
+- Sync is automatic and bidirectional across the user's devices
+- **All `@Model` properties must have default values** — CloudKit creates instances via a no-argument path
+- **Never use `@Attribute(.unique)`** — CloudKit doesn't support unique constraints
+- `CategorySeeder` uses a `UserDefaults` flag (`hasSeededCategories`) to avoid duplicating defaults when CloudKit syncs
 
 ---
 
@@ -351,6 +384,7 @@ Never do any of the following:
 | Force-unwrap `someOptional!` | `guard let`, `if let`, or `?? defaultValue` |
 | `AnyView(...)` type erasure | `@ViewBuilder` or `Group { if ... }` |
 | Third-party dependency for built-in capability | Apple framework (Charts, SwiftData, etc.) |
+| `@Attribute(.unique)` on `@Model` properties | Remove — CloudKit doesn't support unique constraints |
 
 ### J — Git & Branching (Trunk-Based Development)
 
@@ -436,6 +470,6 @@ When adding a new feature, follow these steps in order:
 These are absolute limits regardless of context:
 
 - **iOS 17+ only** — the app uses SwiftData and modern SwiftUI APIs; never lower the deployment target
-- **No network layer** — the app is intentionally offline-only; do not add URLSession, Alamofire, or any HTTP client without explicit discussion
+- **CloudKit only** — sync is handled exclusively by SwiftData's built-in CloudKit integration; do not add URLSession, Alamofire, Supabase, or any HTTP client
 - **No third-party packages** — all needed frameworks (Charts, SwiftData, SwiftUI) are Apple built-ins
 - **No `Codable` on `@Model` classes** — SwiftData manages serialization; adding `Codable` causes conflicts

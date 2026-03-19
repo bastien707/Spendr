@@ -9,13 +9,13 @@ enum TransactionType: String, Codable, CaseIterable {
 
 @Model
 final class Transaction {
-    var id: UUID
-    var title: String
-    var amount: Double
-    var type: TransactionType
+    var id: UUID = UUID()
+    var title: String = ""
+    var amount: Double = 0
+    var type: TransactionType = TransactionType.expense
     var userCategory: UserCategory?
-    var date: Date
-    var note: String
+    var date: Date = Date()
+    var note: String = ""
 
     init(
         title: String,

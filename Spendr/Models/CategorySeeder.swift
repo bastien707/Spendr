@@ -3,9 +3,15 @@ import SwiftData
 
 struct CategorySeeder {
     static func seedIfNeeded(context: ModelContext) {
-        let descriptor = FetchDescriptor<UserCategory>()
-        let count = (try? context.fetchCount(descriptor)) ?? 0
-        guard count == 0 else { return }
+        let key = "hasSeededCategories"
+        guard !UserDefaults.standard.bool(forKey: key) else { return }
+
+        // If CloudKit already synced categories from another device, skip seeding
+        let count = (try? context.fetchCount(FetchDescriptor<UserCategory>())) ?? 0
+        if count > 0 {
+            UserDefaults.standard.set(true, forKey: key)
+            return
+        }
 
         let defaults: [(String, String, String, TransactionType)] = [
             ("Food",          "fork.knife",          "#FF9500", .expense),
@@ -32,5 +38,6 @@ struct CategorySeeder {
         }
 
         try? context.save()
+        UserDefaults.standard.set(true, forKey: key)
     }
 }

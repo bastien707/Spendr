@@ -3,10 +3,10 @@ import SwiftData
 
 @Model
 final class CategoryBudget {
-    var id: UUID
+    var id: UUID = UUID()
     var userCategory: UserCategory?
-    var monthlyLimit: Double
-    var month: Date
+    var monthlyLimit: Double = 0
+    var month: Date = Date()
 
     init(category: UserCategory, monthlyLimit: Double, month: Date = Date()) {
         self.id = UUID()
